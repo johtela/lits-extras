@@ -22,6 +22,10 @@
   },
   "homepage": "https://github.com/johtela/lits-extras#readme",
   "dependencies": {
+    "minimatch": "^3.0.4",
     "taitto": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/minimatch": "^3.0.3"
   }
 }

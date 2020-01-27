@@ -1,5 +1,5 @@
 import * as tt from 'taitto'
-import './dependency-diagram.less'
+import * as mm from 'minimatch'
 let svg = tt.svg
 
 interface Module {
@@ -25,20 +25,24 @@ async function loadDependencies(url: string): Promise<DependencyGraph> {
     return resp.ok ? <DependencyGraph>JSON.parse(await resp.text()) : null
 }
 
-export async function createDependencyDiagram(url: string, parent: HTMLElement) {
+export async function createDependencyDiagram(params: string, 
+    parent: HTMLElement) {
+    let pars = params.split(/\s+/)
+    let url = pars[0]
+    let filter = pars[1]
     let redir = url.substr(0, url.lastIndexOf("/"))
     let dgraph = await loadDependencies(url)
     if (!dgraph)
         throw Error(`Could not load dependency graph from "${url}"`)
     else {
         let modules = Object.getOwnPropertyNames(dgraph)
-            .filter(n => dgraph[n].url)
+            .filter(n => !filter || mm(n, filter))
         let nodes = modules.map(name => {
             let module = dgraph[name]
             let node: tt.Node = {
                 name,
                 label: name,
-                link: redir + "/" + module.url,
+                link: module.url ? redir + "/" + module.url : undefined,
                 shape: (p, x, y, w, h) => svg.rect(p, x, y, w, h, 8, 8)
             }
             module.node = node
