@@ -1,4 +1,5 @@
 import * as tt from 'taitto'
+import './dependency-diagram.less'
 let svg = tt.svg
 
 interface Module {
@@ -24,7 +25,7 @@ async function loadDependencies(url: string): Promise<DependencyGraph> {
     return resp.ok ? <DependencyGraph>JSON.parse(await resp.text()) : null
 }
 
-export async function createDiagram(url: string, parent: HTMLElement) {
+export async function createDependencyDiagram(url: string, parent: HTMLElement) {
     let redir = url.substr(0, url.lastIndexOf("/"))
     let dgraph = await loadDependencies(url)
     if (!dgraph)
