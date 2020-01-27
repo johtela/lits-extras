@@ -1,5 +1,4 @@
 import * as tt from 'taitto'
-import * as mm from 'minimatch'
 let svg = tt.svg
 
 interface Module {
@@ -29,14 +28,14 @@ export async function createDependencyDiagram(params: string,
     parent: HTMLElement) {
     let pars = params.split(/\s+/)
     let url = pars[0]
-    let filter = pars[1]
+    let filter = pars[1] && new RegExp(pars[1])
     let redir = url.substr(0, url.lastIndexOf("/"))
     let dgraph = await loadDependencies(url)
     if (!dgraph)
         throw Error(`Could not load dependency graph from "${url}"`)
     else {
         let modules = Object.getOwnPropertyNames(dgraph)
-            .filter(n => !filter || mm(n, filter))
+            .filter(n => !filter || n.match(filter))
         let nodes = modules.map(name => {
             let module = dgraph[name]
             let node: tt.Node = {
