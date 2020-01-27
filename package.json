@@ -1,0 +1,28 @@
+{
+  "name": "lits-extras",
+  "version": "1.0.0",
+  "description": "Visualizers and other extras for LiTScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johtela/lits-extras.git"
+  },
+  "keywords": [
+    "litscript"
+  ],
+  "author": "Tommi Johtela",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/johtela/lits-extras/issues"
+  },
+  "homepage": "https://github.com/johtela/lits-extras#readme",
+  "dependencies": {
+    "taitto": "^1.0.2"
+  },
+  "peerDependencies": { 
+    "litscript": "^1.0.9"
+  }
+}
