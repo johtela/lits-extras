@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/johtela/lits-extras#readme",
   "dependencies": {
+    "lit-html": "^1.1.2",
     "mocha": "^7.0.1",
     "taitto": "^1.0.2"
   },

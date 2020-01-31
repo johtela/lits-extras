@@ -1,8 +1,5 @@
 import * as mocha from 'mocha'
-
-interface ReporterElems {
-    
-}
+import { html } from 'lit-html'
 
 export class MochaReporter extends mocha.reporters.Base {
     constructor(runner: mocha.Runner) {
@@ -10,6 +7,8 @@ export class MochaReporter extends mocha.reporters.Base {
         
     }
 }
+
+
 
 export function runMochaTest(params: string, parent: HTMLElement) {
 
