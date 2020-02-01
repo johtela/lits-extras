@@ -1,15 +1,51 @@
-import * as mocha from 'mocha'
-import { html } from 'lit-html'
+import * as Mocha from 'mocha/browser-entry'
 
-export class MochaReporter extends mocha.reporters.Base {
-    constructor(runner: mocha.Runner) {
-        super(runner)
-        
-    }
+export interface Test {
+    name: string
+    pass: boolean
+    error?: string
 }
 
+export interface TestStatus {
+    passes: number
+    fails: number
+    tests: Test[]
+    done: boolean
+}
 
-
-export function runMochaTest(params: string, parent: HTMLElement) {
-
+export class MochaReporter extends Mocha.reporters.Base {
+    constructor(runner: Mocha.Runner, render: (status: TestStatus) => void) {
+        super(runner)
+        let status: TestStatus
+        runner.on('start', () => {
+            status = {
+                passes: 0,
+                fails: 0,
+                tests: [],
+                done: false
+            }
+            render(status)
+        })
+        runner.on('end', () => { 
+            status.done = true
+            render(status)
+        })
+        runner.on('pass', test => {
+            status.tests.push({
+                name: test.fullTitle(),
+                pass: true
+            })
+            status.passes++
+            render(status)
+        })
+        runner.on('fail', (test, err) => { 
+            status.tests.push({
+                name: test.fullTitle(),
+                pass: false,
+                error: err.toString()
+            })
+            status.fails++
+            render(status)
+        })        
+    }
 }
