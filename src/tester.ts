@@ -1,13 +1,11 @@
 import * as zora from 'zora'
 
-let harness: zora.TestHarness
+let harness = zora.createHarness()
+if (!window)
+    setTimeout(runTests, 0)
 
 export function getHarness(): zora.TestHarness{
     return harness
-}
-
-export function setHarness(value: zora.TestHarness) {
-    harness = value
 }
 
 async function runTests() {
@@ -26,9 +24,5 @@ async function runTests() {
 
 export function test(description: string, spec: zora.SpecFunction, 
     options?: object): Promise<zora.TestResult> {
-    if (!harness) {
-        harness = zora.createHarness()
-        runTests()
-    }
     return harness.test(description, spec, options)
 }
