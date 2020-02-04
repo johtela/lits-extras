@@ -1,13 +1,14 @@
 import * as zora from 'zora'
 import * as tr from './test-reporter'
-import * as t from './tester'
+import * as tester from './tester'
 import { html, render } from 'lit-html'
 
+tester.setHarness(zora.createHarness())
+
 export function runTests(params: string, parent: HTMLElement) {
-    let harness = zora.createHarness()
-    harness.report(tr.createReporter(status => 
-        render(renderTestStatus(status), parent)))
-    t.setTestFn(harness.test)
+    window.addEventListener('load', () =>
+        tester.getHarness().report(tr.createReporter(status => 
+            render(renderTestStatus(status), parent))))
 }
 
 const renderTestStatus = (status: tr.TestStatus) => html`
@@ -24,5 +25,5 @@ const renderTestStatus = (status: tr.TestStatus) => html`
 
 const renderTest = (test: tr.Test) => html` 
     <li>
-        ${test.name + test.pass ? " Passed" : " Failed" }
+        ${test.name + (test.pass ? " Passed" : " Failed") }
     </li>`
