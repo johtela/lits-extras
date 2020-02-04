@@ -8,13 +8,13 @@ export function runTests(params: string, parent: HTMLElement) {
             render(renderTestStatus(status), parent))))
 }
 
-function assertPass(assertion: tr.Assertion): string {
+function statusIcon(assertion: tr.Assertion): string {
     return assertion.pass ? "✅" : "❌"
 }
 
 const renderTestStatus = (rootTest: tr.Test) => html`
     <div class="summary">
-        ${assertPass(rootTest)}
+        ${statusIcon(rootTest)}
         <span>Pass: </span>
         <span class="count">${rootTest.passes}</span>
         <span>Fail: </span>
@@ -30,7 +30,7 @@ const renderTestList = (tests: tr.Test[]) => html`
 ` 
 const renderAssertion = (assertion: tr.Assertion) => html`
     <li>
-        ${assertPass(assertion)} ${assertion.name}     
+        ${statusIcon(assertion)} ${assertion.name}     
     </li>
 `
 
@@ -45,7 +45,7 @@ const renderAssertions = (assertions: tr.Assertion[]) => html`
 
 const renderTest = (test: tr.Test) => html` 
     <li>
-        ${assertPass(test)} ${test.name} in ${test.duration}ms
+        ${statusIcon(test)} ${test.name} in ${test.duration}ms
         ${test.assertions ? renderAssertions(test.assertions) : ""}
         ${test.tests ? renderTestList(test.tests) : ""}
     </li>`
