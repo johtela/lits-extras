@@ -1,7 +1,6 @@
 import * as tr from './test-reporter'
 import * as tester from './tester'
 import { html, render } from 'lit-html'
-import { TcpSocketConnectOpts } from 'net'
 
 export function runTests(params: string, parent: HTMLElement) {
     window.addEventListener('load', () =>
@@ -9,8 +8,13 @@ export function runTests(params: string, parent: HTMLElement) {
             render(renderTestStatus(status), parent))))
 }
 
+function assertPass(assertion: tr.Assertion): string {
+    return assertion.pass ? "✅" : "❌"
+}
+
 const renderTestStatus = (rootTest: tr.Test) => html`
     <div class="summary">
+        ${assertPass(rootTest)}
         <span>Pass: </span>
         <span class="count">${rootTest.passes}</span>
         <span>Fail: </span>
@@ -20,28 +24,28 @@ const renderTestStatus = (rootTest: tr.Test) => html`
 `
 
 const renderTestList = (tests: tr.Test[]) => html`
-    <ul class="test-list">
+    <ol class="test-list">
         ${tests.map(renderTest)}
-    </ul>
+    </ol>
 ` 
 const renderAssertion = (assertion: tr.Assertion) => html`
     <li>
-        ${assertion.name} ${assertion.pass ? "PASSED " : "FAILED"}     
+        ${assertPass(assertion)} ${assertion.name}     
     </li>
 `
 
 const renderAssertions = (assertions: tr.Assertion[]) => html`
     <details>
-        <summary>Assertions</summary>
-        <ul>
+        <summary>${assertions.length} assertions</summary>
+        <ol>
             ${assertions.map(renderAssertion)}
-        </ul>
+        </ol>
     </details>
 `
 
 const renderTest = (test: tr.Test) => html` 
     <li>
-        ${test.name} ${test.pass ? "PASSED " : "FAILED"} in ${test.duration}ms
+        ${assertPass(test)} ${test.name} in ${test.duration}ms
         ${test.assertions ? renderAssertions(test.assertions) : ""}
         ${test.tests ? renderTestList(test.tests) : ""}
     </li>`
