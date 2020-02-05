@@ -1,7 +1,7 @@
 import * as zora from 'zora'
 
 let harness = zora.createHarness()
-if (!window)
+if (typeof window === 'undefined')
     setTimeout(runTests, 0)
 
 export function getHarness(): zora.TestHarness{
