@@ -6,7 +6,7 @@ export interface Assertion {
 }
 
 export interface Test extends Assertion {
-    error?: string
+    error?: Error
     passes: number
     fails: number
     duration: number
@@ -25,10 +25,10 @@ function createTest(name: string): Test {
     }
 }
 
-export function createReporter(render: (rootTest: Test) => void):
+export function createReporter(name: string, render: (rootTest: Test) => void):
     (stream: zora.TestHarness) => Promise<void> {
-    let rootTest = createTest("")
-    let teststack: Test[] = [ rootTest ]
+    let rootTest = createTest(name)
+    let teststack: Test[] = [rootTest]
     return async (stream: zora.TestHarness): Promise<void> => {
         for await (let message of stream) {
             switch (message.type) {
@@ -55,6 +55,11 @@ export function createReporter(render: (rootTest: Test) => void):
                         name: zass.description,
                         pass: zass.pass
                     })
+                    break
+                case zora.MessageType.BAIL_OUT:
+                    teststack[teststack.length - 1].error =
+                        (message as zora.BailoutMessage).data
+                    render(rootTest)
                     break
             }
         }
