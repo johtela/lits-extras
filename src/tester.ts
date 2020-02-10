@@ -12,8 +12,12 @@ async function runTests() {
     try {
         await harness.report(zora.mochaTapLike)
     }
-    catch {
+    catch(e) {
         harness.pass = false
+        if (e instanceof Error) {
+            console.error(e.name + " exception thrown: " + e.message)
+            console.error(e.stack)
+        }
     }
     if (harness.pass)
         console.log('Tests PASSED')
