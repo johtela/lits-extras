@@ -13,7 +13,8 @@
     "url": "git+https://github.com/johtela/lits-extras.git"
   },
   "keywords": [
-    "litscript"
+    "litscript",
+    "testing"
   ],
   "author": "Tommi Johtela",
   "license": "MPL-2.0",
