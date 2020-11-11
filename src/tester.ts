@@ -1,5 +1,5 @@
 import * as zora from 'zora'
-export * from 'zora'
+export { Assert } from 'zora'
 
 let harness = zora.createHarness()
 if (typeof window === 'undefined')
