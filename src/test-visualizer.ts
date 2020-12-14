@@ -2,12 +2,12 @@ import * as tr from './test-reporter'
 import * as tester from './tester'
 
 export function runTests(params: string, parent: HTMLElement) {
-    window.addEventListener('load', () => {
-        while (parent.firstChild)
-            parent.firstChild.remove()
-        tester.getHarness().report(tr.createReporter(params, status =>
-            parent.appendChild(testStatus(status))))
-    })
+    window.addEventListener('load', () =>
+        tester.getHarness().report(tr.createReporter(params, status => {
+            while (parent.firstChild)
+                parent.firstChild.remove()
+            parent.appendChild(testStatus(status))
+        })))
 }
 
 function elem<K extends keyof HTMLElementTagNameMap>(tagName: K, cls?: string,

@@ -37,7 +37,6 @@ export function createReporter(name: string, render: (rootTest: Test) => void):
                         .data.description)
                     teststack[teststack.length - 1].tests.push(newtest)
                     teststack.push(newtest)
-                    render(rootTest)
                     break
                 case zora.MessageType.TEST_END:
                     let ztest = message.data as zora.Test
