@@ -1,0 +1,31 @@
+@import "~taitto/styles/taitto.css";
+
+.digraph {
+    --node-color: hsl(197, 100%, 80%);
+    --node-light-color: hsl(197, 100%, 90%);
+    --text-color: hsl(240, 20%, 17%);
+    
+    width: 100%;
+    height: auto;
+    filter: drop-shadow( 3px 3px 4px #AAA);
+}
+.digraph .node, 
+.digraph .node a {
+    fill: var(--node-color);
+}
+.digraph .node:hover, 
+.digraph .node a::hover {
+    fill: var(--node-light-color);
+}
+.digraph text {
+    font-size: 16px;
+    fill: var(--text-color);
+}
+.digraph .edge {
+    stroke-width: 2;
+    stroke: var(--text-color);
+}
+.digraph .arrow {
+    fill: none;
+    stroke: var(--text-color);
+}
