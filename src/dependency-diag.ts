@@ -1,4 +1,6 @@
 import * as tt from 'taitto'
+import '../styles/dependency-diag.css'
+
 let svg = tt.svg
 
 interface Module {
@@ -28,7 +30,7 @@ export class DependencyDiagram extends HTMLElement {
         let shadow = this.attachShadow({ mode: 'open' })
         let link = document.createElement('link')
         link.setAttribute('rel', 'stylesheet')
-        link.setAttribute('href', '/css/dependency-diag.css')
+        link.setAttribute('href', '/dist/lits-extras.css')
         shadow.appendChild(link)
         this.body = document.createElement('div')
         this.classList.add("test-runner")

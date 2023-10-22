@@ -1,4 +1,4 @@
-@import "~taitto/styles/taitto.css";
+@import "taitto/styles/taitto.css";
 
 .digraph {
     --node-color: hsl(197, 100%, 80%);
