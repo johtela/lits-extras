@@ -33,7 +33,6 @@ export class DependencyDiagram extends HTMLElement {
         link.setAttribute('href', '/dist/lits-extras.css')
         shadow.appendChild(link)
         this.body = document.createElement('div')
-        this.classList.add("test-runner")
         shadow.appendChild(this.body)
         this.connected = false
     }
