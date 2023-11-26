@@ -11,7 +11,9 @@ export class TestRunner extends HTMLElement {
         let shadow = this.attachShadow({ mode: 'open' })
         let link = this.elem('link')
         link.setAttribute('rel', 'stylesheet')
-        link.setAttribute('href', '/css/test-runner.css')
+        let src = (document.currentScript as HTMLScriptElement).src
+        let path = src.substring(0, src.lastIndexOf("/"))
+        link.setAttribute('href', `${path}/lits-extras.css`)
         shadow.appendChild(link)
         this.body = this.elem('div', "test-runner")
         shadow.appendChild(this.body)

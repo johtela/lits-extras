@@ -30,7 +30,9 @@ export class DependencyDiagram extends HTMLElement {
         let shadow = this.attachShadow({ mode: 'open' })
         let link = document.createElement('link')
         link.setAttribute('rel', 'stylesheet')
-        link.setAttribute('href', '/dist/lits-extras.css')
+        let src = (document.currentScript as HTMLScriptElement).src
+        let path = src.substring(0, src.lastIndexOf("/"))
+        link.setAttribute('href', `${path}/lits-extras.css`)
         shadow.appendChild(link)
         this.body = document.createElement('div')
         shadow.appendChild(this.body)
