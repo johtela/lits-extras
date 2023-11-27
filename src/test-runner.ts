@@ -1,20 +1,31 @@
 import * as tr from './test-reporter'
 import * as tester from './tester'
-import '../styles/test-runner.css'
 
 export class TestRunner extends HTMLElement {
     private body: HTMLElement
     private connected: boolean
+    private styles = /*css*/`
+        .test-runner {
+            font-family: var(--sans-font);
+            padding: 10px;
+            border-radius: 4px;
+        }    
+        .test-runner .summary {
+            font-weight: bolder;
+        }
+        .test-runner .summary .count {
+            margin-left: 12px;
+        }
+        .test-runner pre {
+            background-color: #fff0f0;
+        }`
 
     constructor() {
         super();
         let shadow = this.attachShadow({ mode: 'open' })
-        let link = this.elem('link')
-        link.setAttribute('rel', 'stylesheet')
-        let src = (document.currentScript as HTMLScriptElement).src
-        let path = src.substring(0, src.lastIndexOf("/"))
-        link.setAttribute('href', `${path}/lits-extras.css`)
-        shadow.appendChild(link)
+        let sheet = new CSSStyleSheet()
+        sheet.replaceSync(this.styles)
+        shadow.adoptedStyleSheets = [ sheet ]
         this.body = this.elem('div', "test-runner")
         shadow.appendChild(this.body)
         this.connected = false
