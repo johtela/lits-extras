@@ -9,6 +9,7 @@ export class TestRunner extends HTMLElement {
             font-family: var(--sans-font);
             padding: 10px;
             border-radius: 4px;
+            overflow: auto;
         }    
         .test-runner .summary {
             font-weight: bolder;
