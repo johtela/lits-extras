@@ -1,6 +1,6 @@
 {
   "name": "lits-extras",
-  "version": "1.0.7",
+  "version": "2.0.0",
   "description": "Visualizers and other extras for LiTScript",
   "main": "lib/index.js",
   "scripts": {
