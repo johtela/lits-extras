@@ -8,9 +8,11 @@ export class TestRunner extends HTMLElement {
         .test-runner {
             font-family: var(--sans-font);
             font-size: 1rem;
+            color: black;
         }    
         .test-visualizer {
             overflow: auto;
+            max-height: 100vh;
         }
         .test-runner .summary {
             font-weight: bolder;
@@ -20,6 +22,9 @@ export class TestRunner extends HTMLElement {
         }
         .test-runner pre {
             background-color: #fff0f0;
+        }
+        summary {
+            cursor: pointer;
         }`
 
     constructor() {
