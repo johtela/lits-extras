@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/johtela/lits-extras#readme",
   "dependencies": {
-    "taitto": "^1.1.0",
+    "taitto": "^1.1.1",
     "zora": "^4.1.0"
   },
   "devDependencies": {
