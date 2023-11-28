@@ -8,8 +8,10 @@ export class TestRunner extends HTMLElement {
         .test-runner {
             font-family: var(--sans-font);
             font-size: 1rem;
-            overflow: auto;
         }    
+        .test-visualizer {
+            overflow: auto;
+        }
         .test-runner .summary {
             font-weight: bolder;
         }
