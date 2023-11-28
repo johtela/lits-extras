@@ -14,7 +14,7 @@ export class TestRunner extends HTMLElement {
             font-weight: bolder;
         }
         .test-runner .summary .count {
-            margin-left: 12px;
+            margin-left: 1rem;
         }
         .test-runner pre {
             background-color: #fff0f0;
