@@ -2,6 +2,7 @@
     "compilerOptions": {
         "declaration": true,
         "sourceMap": true,
+        "rootDir": ".",
         "outDir": "./lib",
         "module": "commonjs",
         "target": "ES2018",

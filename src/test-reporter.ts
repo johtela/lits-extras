@@ -1,11 +1,5 @@
-import * as zora from 'zora'
 
-export interface Assertion {
-    name: string
-    pass?: boolean
-}
-
-export interface Test extends Assertion {
+export interface TestResult extends Assertion {
     error?: Error
     passes: number
     fails: number
@@ -26,10 +20,10 @@ function createTest(name: string): Test {
 }
 
 export function createReporter(name: string, render: (rootTest: Test) => void):
-    (stream: zora.TestHarness) => Promise<void> {
+    (stream: AsyncIterable<zora.Message>) => Promise<void> {
     let rootTest = createTest(name)
     let teststack: Test[] = [rootTest]
-    return async (stream: zora.TestHarness): Promise<void> => {
+    return async (messageStream: zora.ITestHarness): Promise<void> => {
         for await (let message of stream) {
             switch (message.type) {
                 case zora.MessageType.TEST_START:
