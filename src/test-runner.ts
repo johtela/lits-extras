@@ -1,4 +1,3 @@
-import * as tr from './test-reporter'
 import * as tester from './tester'
 
 export class TestRunner extends HTMLElement {
@@ -43,15 +42,25 @@ export class TestRunner extends HTMLElement {
             return
         this.connected = true
         let name = this.getAttribute("name")
-        this.runTests(name)
+        this.runTests(name || undefined)
     }
     
-    runTests(name: string) {
-        tester.getHarness().report(tr.createReporter(name, status => {
-            while (this.body.firstChild)
-                this.body.firstChild.remove()
-            this.body.appendChild(this.testStatus(status))
-        }))
+    async runTests(name?: string) {
+        while (this.body.firstChild)
+            this.body.firstChild.remove()
+        let visualizer = this.testVisualizer()
+        let summary = this.testSummary(visualizer)
+        let list = this.testList(visualizer)
+        let passed = 0
+        let failed = 0
+        for await (let result of tester.runTests(name)) {
+            if (result.passed)
+                passed++
+            else
+                failed++
+            this.updateSummary(summary, passed, failed)
+            list.append(this.testResult(result))
+        }
     }
     
     elem<K extends keyof HTMLElementTagNameMap>(tagName: K, cls?: string,
@@ -64,39 +73,51 @@ export class TestRunner extends HTMLElement {
         return res
     }
     
-    statusIcon(assertion: tr.Assertion): string {
-        return assertion.pass ? "✅" : "❌"
+    statusIcon(result: tester.Assertion): string {
+        return result.passed ? "✅" : "❌"
     }
 
-    testStyle(test: tr.Test) {
-        return test.pass ? '#f8fff8' : '#fff8f8'
+    statusColor(passed: boolean) {
+        return passed ? '#f8fff8' : '#fff8f8'
     }
 
-    testStatus(rootTest: tr.Test): HTMLElement {
-        let vis = this.elem("div","test-visualizer")
-        vis.style.backgroundColor = this.testStyle(rootTest)
-        let sum = this.elem("div", "summary", `${this.statusIcon(rootTest)} ${
-            rootTest.name}`)
-        sum.appendChild(this.elem("span", "count", `Pass: ${rootTest.passes}`))
-        sum.appendChild(this.elem("span", "count", `Fail: ${rootTest.fails}`))
-        vis.appendChild(sum)
-        vis.appendChild(this.testList(rootTest.tests))
-        return vis
+    testVisualizer(): HTMLElement {
+        let res = this.elem("div", "test-visualizer")
+        this.body.append(res)
+        return res
+    }
+    
+    testSummary(visualizer: HTMLElement): HTMLElement {
+        let summary = this.elem("div", "summary")
+        summary.appendChild(this.elem("span", "count", "Pass: 0"))
+        summary.appendChild(this.elem("span", "count", "Fail: 0"))
+        visualizer.appendChild(summary)
+        return summary
     }
 
-    testList(tests: tr.Test[]): HTMLElement {
+    updateSummary(summary: HTMLElement, passed: number, failed: number) {
+        summary.style.backgroundColor = this.statusColor(failed == 0);
+        (summary.firstElementChild as HTMLElement).innerText = 
+            `Pass: ${passed}`;
+        (summary.lastElementChild as HTMLElement).innerText = 
+            `Fail: ${failed}`
+    }
+
+    testList(visualizer: HTMLElement): HTMLElement {
         let lst = this.elem("ol", "test-list")
-        for (let i = 0; i < tests.length; i++)
-            lst.appendChild(this.test(tests[i]))
+        visualizer.append(lst)
         return lst
     }
 
-    assertion(assertion: tr.Assertion): HTMLElement {
-        return this.elem("li", undefined, `${this.statusIcon(assertion)} ${
-            assertion.name}`)
+    testResult(result: tester.TestResult): HTMLElement {
+        let li = this.elem("li", undefined, 
+            `${this.statusIcon(result)} ${result.message}`)
+        if (result.assertions)
+            li.appendChild(this.assertions(result.assertions))
+        return li
     }
 
-    assertions(assertions: tr.Assertion[]): HTMLElement {
+    assertions(assertions: tester.Assertion[]): HTMLElement {
         let det = this.elem("details")
         det.appendChild(
             this.elem("summary", undefined, `${assertions.length} assertions`))
@@ -107,26 +128,9 @@ export class TestRunner extends HTMLElement {
         return det
     }
 
-    test(test: tr.Test): HTMLElement {
-        if (test.error)
-            return this.bailedOutTest(test)
-        let li = this.elem("li", undefined, 
-            `${this.statusIcon(test)} ${test.name} in ${test.duration}ms`)
-        if (test.assertions)
-            li.appendChild(this.assertions(test.assertions))
-        if (test.tests)
-            li.appendChild(this.testList(test.tests))
-        return li
-    }
-
-    bailedOutTest(test: tr.Test): HTMLElement {
-        let res = this.elem("li")
-        res.innerHTML =
-            `${this.statusIcon(test)} ${test.name} threw <b>${
-                test.error.name}</b> exception:
-            <br/><b>${test.error.message}</b>
-            <pre>${test.error.stack}</pre>`
-        return res
+    assertion(assertion: tester.Assertion): HTMLElement {
+        return this.elem("li", undefined, `${this.statusIcon(assertion)} ${
+            assertion.message}`)
     }
 }
 

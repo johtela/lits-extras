@@ -1,85 +1,67 @@
 /**
- * # Assertions, Reporters, and Tests
+ * # Assertions and Tests
  * 
- * Define an exception class for failed assertions.
- */
-export class AssertError<T> extends Error {
-    /**
-     * Constructor specifies what value an assertion expected and what it got.
-     */
-    constructor(message: string, value1: T, value2?: T) {
-        super(value2 != undefined ?
-            `${message}.\nValue1: ${value1}\nValue2: ${value2}` :
-            `${message}.\nValue: ${value1}`)
-    }
-}
-/**
+ * Basic building blocks of a test suite.
+ * 
  * ## Assertions
  * 
- * Different comparisons to assert that test has succeeded.
+ * Different comparisons to assert that test has succeeded. The result of an
+ * assertion is saved in the Assertion object.
+ */
+export interface Assertion {
+    message: string
+    passed: boolean
+}
+/**
+ * The Assert class provides methods for checking equalities and conditions.
+ * It tracks results of those checks in Assertion objects.
  */
 export class Assert {
-    equal<T>(value1: T, value2: T) {
-        if (value1 != value2)
-            throw new AssertError("Values should be equal", value1, value2)
+    readonly assertions: Assertion[] = []
+
+    private record(message: string, pass: boolean) {
+        this.assertions.push({ message, passed: pass })
     }
-    notEqual<T>(value1: T, value2: T) {
-        if (value1 == value2)
-            throw new AssertError("Values should not be equal", value1, 
-                value2)
+    equal<T>(message: string, value1: T, value2: T) {
+        this.record(message, value1 == value2)
     }
-    same<T>(value1: T, value2: T) {
-        if (!Object.is(value1, value2))
-            throw new AssertError("Values should be the same", value1, value2)
+    notEqual<T>(message: string, value1: T, value2: T) {
+        this.record(message, value1 != value2)
     }
-    notSame<T>(value1: T, value2: T) {
-        if (Object.is(value1, value2))
-            throw new AssertError("Values should not be the same", value1, 
-                value2)
+    same<T>(message: string, value1: T, value2: T) {
+        this.record(message, Object.is(value1, value2))
     }
-    isTrue<T>(value: T) {
-        if (value)
-            throw new AssertError("Value should be true", value)
+    notSame<T>(message: string, value1: T, value2: T) {
+        this.record(message, !Object.is(value1, value2))
     }
-    isFalse<T>(value: T) {
-        if (value)
-            throw new AssertError("Value should not be true", value)
+    isTrue(message: string, value: boolean) {
+        this.record(message, value)
     }
-    throws<T extends ErrorConstructor>(func: () => any, error: T) {
+    isFalse(message: string, value: boolean) {
+        this.record(message, !value)
+    }
+    throws<T extends ErrorConstructor>(message: string, 
+        func: () => any, error: T) {
         try {
             func()
         }
         catch (e) {
             if (e instanceof error)
-                return
+                this.record(message, true)
         }
-        throw new AssertError("Expected to get an exception", 
-            error.toString())
+        this.record(message, false)
     }
 }
 /**
- * ## Reporter
+ * ## Results
  * 
- * A test reporter is a function which is called for passed and failed tests. It
- * gets a TestResult object as an argument.
+ * Test results get returned as an object.
  */
-export interface TestResult {
+export interface TestResult extends Assertion {
     test: Test
-    message: string
-    passed: boolean
-    error?: Error
+    assertions: Assertion[]
+    error?: any
     duration?: number
-}
-export type TestReporter = (result: TestResult) => any
-/**
- * There can be only one active reporter at a time. It is registered with
- * `registerReporter` function.
- */
-let reporter: TestReporter | undefined
-export function registerReporter(report: TestReporter) {
-    if (reporter)
-        throw new Error("Reporter already registered")
-    reporter = report
 }
 /**
  * ## Tests
@@ -89,12 +71,12 @@ export function registerReporter(report: TestReporter) {
 export type SpecFunc = (assert: Assert) => any
 export class Test {
     /**
-     * Construct a test from description and specificatin function.
+     * Construct a test from message and specificatin function.
      */
     constructor(
+        readonly name: string,
         readonly description: string,
         readonly spec: SpecFunc) { }
-     
 }
 /**
  * Global list of tests. On the browser they are run after the browser is idle.
@@ -110,8 +92,7 @@ let performance = typeof window != 'undefined' ?
 /**
  * Run all recorded tests.
  */
-async function runTests() {
-    let assert = new Assert()
+export async function* runTests(name?: string): AsyncIterable<TestResult> {
     let test: Test | undefined
     let duration: number
     for (let i = 0; i < tests.length; ++i)
@@ -119,32 +100,39 @@ async function runTests() {
             duration = 0
             let start = performance?.now() || 0
             test = tests[i]
-            test.spec(assert)
-            let end = performance?.now() || 0
-            duration = end - start
-            let message = `Test "${test?.description}" PASSED\n`
-            reporter?.({
-                test: test!,
-                message,
-                passed: true,
-                duration
-            })
+            if (!name || test.name == name) {
+                let assert = new Assert()
+                await Promise.resolve(test.spec(assert))
+                let end = performance?.now() || 0
+                duration = end - start
+                let passed = assert.assertions.every(a => a.passed)
+                let message = `Test "${test!.description}" ${
+                    passed ? "PASSED" : "FAILED" } in ${duration}ms\n`
+                yield {
+                    test: test!,
+                    message,
+                    passed,
+                    assertions: assert.assertions,
+                    duration
+                }
+            }
         }
         catch(e) {
             let message = `Test "${test?.description}" FAILED\n`
             if (e instanceof Error)
                 message += `${e.name} exception thrown: ${e.message}\n${e.stack}`
-            reporter?.({
+            yield {
                 test: test!,
                 message,
                 passed: false,
-                error: e instanceof Error ? e : undefined
-            })
+                assertions: [],
+                error: e
+            }
         }
 }
 /**
  * Create a test.
  */
-export function test(description: string, spec: SpecFunc): void {
-    tests.push(new Test(description, spec))
+export function test(name: string, description: string, spec: SpecFunc): void {
+    tests.push(new Test(name, description, spec))
 }
