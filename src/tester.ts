@@ -83,10 +83,18 @@ export class Test {
  */
 let tests: Test[] = []
 /**
- * The performance object. This is set from outside the module, if run on node.
+ * The timer object. This is set from outside the module, if run on node. For
+ * browser the `window.performance` object is used.
  */
-export let performance = typeof window != 'undefined' ?
+export interface Timer {
+    now(): number
+}
+let timer: Timer | undefined = typeof window != 'undefined' ?
     window.performance : undefined
+
+export function setTimer(t: Timer) {
+    timer = t
+}
 /**
  * Run all recorded tests.
  */
@@ -96,16 +104,16 @@ export async function* runTests(name?: string): AsyncIterable<TestResult> {
     for (let i = 0; i < tests.length; ++i)
         try {
             duration = 0
-            let start = performance?.now() || 0
+            let start = timer?.now() || 0
             test = tests[i]
             if (!name || test.name == name) {
                 let assert = new Assert()
                 await Promise.resolve(test.spec(assert))
-                let end = performance?.now() || 0
-                duration = end - start
+                let end = timer?.now() || 0
+                duration = Math.round(end - start)
                 let passed = assert.assertions.every(a => a.passed)
                 let message = `Test "${test!.description}" ${
-                    passed ? "PASSED" : "FAILED" } in ${duration}ms\n`
+                    passed ? "PASSED" : "FAILED" } in ${duration}ms`
                 yield {
                     test: test!,
                     message,
