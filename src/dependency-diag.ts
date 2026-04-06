@@ -45,10 +45,11 @@ export class DependencyDiagram extends HTMLElement {
         this.connected = true
         let url = this.getAttribute("url")
         let filter = this.getAttribute("filter")
-        this.createDependencyDiagram(url, filter)
+        if (url && filter)
+            this.createDependencyDiagram(url, filter)
     }
     
-    async loadDependencies(url: string): Promise<DependencyGraph> {
+    async loadDependencies(url: string): Promise<DependencyGraph | null> {
         let resp = await fetch(url)
         return resp.ok ? <DependencyGraph>JSON.parse(await resp.text()) : null
     }

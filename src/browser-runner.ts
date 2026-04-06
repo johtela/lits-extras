@@ -1,6 +1,6 @@
 import * as tester from './tester'
 
-export class TestRunner extends HTMLElement {
+export class BrowserRunner extends HTMLElement {
     private body: HTMLElement
     private connected: boolean
     private styles = /*css*/`
@@ -134,4 +134,4 @@ export class TestRunner extends HTMLElement {
     }
 }
 
-customElements.define('test-runner', TestRunner)
+customElements.define('test-runner', BrowserRunner)

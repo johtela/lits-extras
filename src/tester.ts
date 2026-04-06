@@ -82,12 +82,10 @@ export class Test {
  * Global list of tests. On the browser they are run after the browser is idle.
  */
 let tests: Test[] = []
-if (typeof window === 'undefined')
-    setTimeout(runTests, 0)
 /**
- * The performance object.
+ * The performance object. This is set from outside the module, if run on node.
  */
-let performance = typeof window != 'undefined' ?
+export let performance = typeof window != 'undefined' ?
     window.performance : undefined
 /**
  * Run all recorded tests.

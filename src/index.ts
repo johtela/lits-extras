@@ -1,2 +1,2 @@
 export * from './dependency-diag'
-export * from './test-runner'
+export * from './browser-runner'
