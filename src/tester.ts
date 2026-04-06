@@ -22,11 +22,40 @@ export class Assert {
     private record(message: string, pass: boolean) {
         this.assertions.push({ message, passed: pass })
     }
+    private deepEqual(a: any, b: any): boolean {
+        if (a === b) 
+            return true
+        if (a == null || b == null) 
+            return a === b
+        if (Array.isArray(a) && Array.isArray(b)) {
+            if (a.length !== b.length) 
+                return false
+            for (let i = 0; i < a.length; i++) {
+                if (!this.deepEqual(a[i], b[i])) 
+                    return false
+            }
+            return true
+        }
+        if (typeof a === 'object' && typeof b === 'object') {
+            const keysA = Object.keys(a)
+            const keysB = Object.keys(b)
+            if (keysA.length !== keysB.length) 
+                return false
+            for (const key of keysA) {
+                if (!keysB.includes(key)) 
+                    return false
+                if (!this.deepEqual(a[key], b[key])) 
+                    return false
+            }
+            return true
+        }
+        return false
+    }
     equal<T>(message: string, value1: T, value2: T) {
-        this.record(message, value1 == value2)
+        this.record(message, this.deepEqual(value1, value2))
     }
     notEqual<T>(message: string, value1: T, value2: T) {
-        this.record(message, value1 != value2)
+        this.record(message, !this.deepEqual(value1, value2))
     }
     same<T>(message: string, value1: T, value2: T) {
         this.record(message, Object.is(value1, value2))
@@ -40,16 +69,15 @@ export class Assert {
     isFalse(message: string, value: boolean) {
         this.record(message, !value)
     }
-    throws<T extends ErrorConstructor>(message: string, 
+    throws<T extends Function>(message: string, 
         func: () => any, error: T) {
         try {
             func()
+            this.record(message, false)
         }
         catch (e) {
-            if (e instanceof error)
-                this.record(message, true)
+            this.record(message, e instanceof error)
         }
-        this.record(message, false)
     }
 }
 /**
@@ -74,7 +102,6 @@ export class Test {
      * Construct a test from message and specificatin function.
      */
     constructor(
-        readonly name: string,
         readonly description: string,
         readonly spec: SpecFunc) { }
 }
@@ -98,29 +125,27 @@ export function setTimer(t: Timer) {
 /**
  * Run all recorded tests.
  */
-export async function* runTests(name?: string): AsyncIterable<TestResult> {
+export async function* runTests(): AsyncIterable<TestResult> {
     let test: Test | undefined
     let duration: number
     for (let i = 0; i < tests.length; ++i)
         try {
+            test = tests[i]
             duration = 0
             let start = timer?.now() || 0
-            test = tests[i]
-            if (!name || test.name == name) {
-                let assert = new Assert()
-                await Promise.resolve(test.spec(assert))
-                let end = timer?.now() || 0
-                duration = Math.round(end - start)
-                let passed = assert.assertions.every(a => a.passed)
-                let message = `Test "${test!.description}" ${
-                    passed ? "PASSED" : "FAILED" } in ${duration}ms`
-                yield {
-                    test: test!,
-                    message,
-                    passed,
-                    assertions: assert.assertions,
-                    duration
-                }
+            let assert = new Assert()
+            await Promise.resolve(test.spec(assert))
+            let end = timer?.now() || 0
+            duration = Math.round(end - start)
+            let passed = assert.assertions.every(a => a.passed)
+            let message = `Test "${test!.description}" ${
+                passed ? "PASSED" : "FAILED" } in ${duration}ms`
+            yield {
+                test: test!,
+                message,
+                passed,
+                assertions: assert.assertions,
+                duration
             }
         }
         catch(e) {
@@ -139,6 +164,6 @@ export async function* runTests(name?: string): AsyncIterable<TestResult> {
 /**
  * Create a test.
  */
-export function test(name: string, description: string, spec: SpecFunc): void {
-    tests.push(new Test(name, description, spec))
+export function test(description: string, spec: SpecFunc): void {
+    tests.push(new Test(description, spec))
 }

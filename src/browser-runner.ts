@@ -41,11 +41,10 @@ export class BrowserRunner extends HTMLElement {
         if (this.connected)
             return
         this.connected = true
-        let name = this.getAttribute("name")
-        this.runTests(name || undefined)
+        window.requestIdleCallback(() => this.runTests())
     }
     
-    async runTests(name?: string) {
+    async runTests() {
         while (this.body.firstChild)
             this.body.firstChild.remove()
         let visualizer = this.testVisualizer()
@@ -53,7 +52,7 @@ export class BrowserRunner extends HTMLElement {
         let list = this.testList(visualizer)
         let passed = 0
         let failed = 0
-        for await (let result of tester.runTests(name)) {
+        for await (let result of tester.runTests()) {
             if (result.passed)
                 passed++
             else

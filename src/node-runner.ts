@@ -6,13 +6,13 @@
 import * as tester from './tester'
 import { performance } from 'perf_hooks'
 
-export async function runTests(name?: string): Promise<number> {
+export async function runTests(): Promise<number> {
     let timer: tester.Timer = performance
     tester.setTimer(timer)
     let passed = 0
     let failed = 0
     let start = timer.now()
-    for await (let result of tester.runTests(name)) {
+    for await (let result of tester.runTests()) {
         if (result.passed)
             passed++
         else
@@ -20,7 +20,7 @@ export async function runTests(name?: string): Promise<number> {
         testResult(result)
     }
     let dur = Math.round(timer.now() - start)
-    console.log(`${failed} tests failed and ${passed} passed in ${dur}ms`)
+    console.log(`${passed} tests passed and ${failed} failed in ${dur}ms`)
     return failed > 0 ? -1 : 0
 }
 
